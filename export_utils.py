@@ -173,15 +173,20 @@ def generate_docx(isim: str, meslek_alani: str, analiz: dict) -> bytes:
 
 def generate_csv(rows: list[dict]) -> bytes:
     """Analiz geçmişini CSV olarak döner."""
-    try:
-        import pandas as pd
-    except ImportError:
-        raise ImportError("pandas paketi yüklü değil.")
+    import csv
 
-    records = []
+    buf = io.StringIO()
+    fieldnames = [
+        "ID", "İsim", "Tarih", "Meslek Alanı", "AI Modeli", "Puan",
+        "Güçlü Yönler", "Eksikler", "Önerilen Meslekler", "Öneriler"
+    ]
+    
+    writer = csv.DictWriter(buf, fieldnames=fieldnames, lineterminator="\n")
+    writer.writeheader()
+    
     for row in rows:
         analiz = row.get("analiz_sonucu", {})
-        records.append({
+        writer.writerow({
             "ID": row.get("id"),
             "İsim": row.get("isim"),
             "Tarih": row.get("tarih"),
@@ -194,7 +199,4 @@ def generate_csv(rows: list[dict]) -> bytes:
             "Öneriler": "; ".join(analiz.get("oneriler", [])),
         })
 
-    df = pd.DataFrame(records)
-    buf = io.BytesIO()
-    df.to_csv(buf, index=False, encoding="utf-8-sig")
-    return buf.getvalue()
+    return buf.getvalue().encode("utf-8-sig")
