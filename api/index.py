@@ -26,6 +26,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/api")
+@app.get("/api/")
+async def api_root():
+    return {"status": "ok", "message": "AI CV Analyzer API is running"}
+
 @app.get("/api/fetch-url")
 async def api_fetch_url(url: str):
     try:
